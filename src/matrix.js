@@ -1,7 +1,7 @@
-// Matrix class - depends on Vector.
+// Sylvester.Matrix class - depends on Sylvester.Vector.
 
-function Matrix() {}
-Matrix.prototype = {
+Sylvester.Matrix = function () {};
+Sylvester.Matrix.prototype = {
 
   // Returns element (i,j) of the matrix
   e: function(i,j) {
@@ -12,7 +12,7 @@ Matrix.prototype = {
   // Returns row k of the matrix as a vector
   row: function(i) {
     if (i > this.elements.length) { return null; }
-    return Vector.create(this.elements[i-1]);
+    return Sylvester.Vector.create(this.elements[i-1]);
   },
 
   // Returns column k of the matrix as a vector
@@ -20,7 +20,7 @@ Matrix.prototype = {
     if (j > this.elements[0].length) { return null; }
     var col = [], n = this.elements.length;
     for (var i = 0; i < n; i++) { col.push(this.elements[i][j-1]); }
-    return Vector.create(col);
+    return Sylvester.Vector.create(col);
   },
 
   // Returns the number of rows/columns the matrix has
@@ -43,7 +43,7 @@ Matrix.prototype = {
   // one-column matrix equal to the vector.
   eql: function(matrix) {
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
+    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     if (this.elements.length != M.length ||
         this.elements[0].length != M[0].length) { return false; }
     var i = this.elements.length, nj = this.elements[0].length, j;
@@ -57,7 +57,7 @@ Matrix.prototype = {
 
   // Returns a copy of the matrix
   dup: function() {
-    return Matrix.create(this.elements);
+    return Sylvester.Matrix.create(this.elements);
   },
 
   // Maps the matrix to another matrix (of the same dimensions) according to the given function
@@ -69,13 +69,13 @@ Matrix.prototype = {
         els[i][j] = fn(this.elements[i][j], i + 1, j + 1);
       }
     }
-    return Matrix.create(els);
+    return Sylvester.Matrix.create(els);
   },
 
   // Returns true iff the argument has the same dimensions as the matrix
   isSameSizeAs: function(matrix) {
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
+    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     return (this.elements.length == M.length &&
         this.elements[0].length == M[0].length);
   },
@@ -83,7 +83,7 @@ Matrix.prototype = {
   // Returns the result of adding the argument to the matrix
   add: function(matrix) {
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
+    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     if (!this.isSameSizeAs(M)) { return null; }
     return this.map(function(x, i, j) { return x + M[i-1][j-1]; });
   },
@@ -91,7 +91,7 @@ Matrix.prototype = {
   // Returns the result of subtracting the argument from the matrix
   subtract: function(matrix) {
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
+    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     if (!this.isSameSizeAs(M)) { return null; }
     return this.map(function(x, i, j) { return x - M[i-1][j-1]; });
   },
@@ -99,7 +99,7 @@ Matrix.prototype = {
   // Returns true iff the matrix can multiply the argument from the left
   canMultiplyFromLeft: function(matrix) {
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
+    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     // this.columns should equal matrix.rows
     return (this.elements[0].length == M.length);
   },
@@ -114,7 +114,7 @@ Matrix.prototype = {
     }
     var returnVector = matrix.modulus ? true : false;
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
+    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     if (!this.canMultiplyFromLeft(M)) { return null; }
     var i = this.elements.length, nj = M[0].length, j;
     var cols = this.elements[0].length, c, elements = [], sum;
@@ -128,7 +128,7 @@ Matrix.prototype = {
         elements[i][j] = sum;
       }
     }
-    var M = Matrix.create(elements);
+    var M = Sylvester.Matrix.create(elements);
     return returnVector ? M.col(1) : M;
   },
 
@@ -148,7 +148,7 @@ Matrix.prototype = {
         elements[i][j] = this.elements[(a+i-1)%rows][(b+j-1)%cols];
       }
     }
-    return Matrix.create(elements);
+    return Sylvester.Matrix.create(elements);
   },
 
   // Returns the transpose of the matrix
@@ -161,7 +161,7 @@ Matrix.prototype = {
         elements[i][j] = this.elements[j][i];
       }
     }
-    return Matrix.create(elements);
+    return Sylvester.Matrix.create(elements);
   },
 
   // Returns true iff the matrix is square
@@ -199,7 +199,7 @@ Matrix.prototype = {
     for (var i = 0; i < n; i++) {
       els.push(this.elements[i][i]);
     }
-    return Vector.create(els);
+    return Sylvester.Vector.create(els);
   },
 
   // Make the matrix upper (right) triangular by Gaussian elimination.
@@ -286,7 +286,7 @@ Matrix.prototype = {
   // Returns the result of attaching the given argument to the right-hand side of the matrix
   augment: function(matrix) {
     var M = matrix.elements || matrix;
-    if (typeof(M[0][0]) == 'undefined') { M = Matrix.create(M).elements; }
+    if (typeof(M[0][0]) == 'undefined') { M = Sylvester.Matrix.create(M).elements; }
     var T = this.dup(), cols = T.elements[0].length;
     var i = T.elements.length, nj = M[0].length, j;
     if (i != M.length) { return null; }
@@ -302,10 +302,10 @@ Matrix.prototype = {
   inverse: function() {
     if (!this.isSquare() || this.isSingular()) { return null; }
     var n = this.elements.length, i= n, j;
-    var M = this.augment(Matrix.I(n)).toRightTriangular();
+    var M = this.augment(Sylvester.Matrix.I(n)).toRightTriangular();
     var np = M.elements[0].length, p, els, divisor;
     var inverse_elements = [], new_element;
-    // Matrix is non-singular so there will be no zeros on the diagonal
+    // Sylvester.Matrix is non-singular so there will be no zeros on the diagonal
     // Cycle through rows from last to first
     while (i--) {
       // First, normalise diagonal elements to 1
@@ -331,7 +331,7 @@ Matrix.prototype = {
         M.elements[j] = els;
       }
     }
-    return Matrix.create(inverse_elements);
+    return Sylvester.Matrix.create(inverse_elements);
   },
 
   inv: function() { return this.inverse(); },
@@ -354,7 +354,7 @@ Matrix.prototype = {
     var matrix_rows = [];
     var n = this.elements.length;
     for (var i = 0; i < n; i++) {
-      matrix_rows.push(Vector.create(this.elements[i]).inspect());
+      matrix_rows.push(Sylvester.Vector.create(this.elements[i]).inspect());
     }
     return matrix_rows.join('\n');
   },
@@ -384,14 +384,13 @@ Matrix.prototype = {
 };
 
 // Constructor function
-Matrix.create = function(elements) {
-  var M = new Matrix();
+Sylvester.Matrix.create = function(elements) {
+  var M = new Sylvester.Matrix();
   return M.setElements(elements);
 };
-var $M = Matrix.create;
 
 // Identity matrix of size n
-Matrix.I = function(n) {
+Sylvester.Matrix.I = function(n) {
   var els = [], i = n, j;
   while (i--) { j = n;
     els[i] = [];
@@ -399,13 +398,13 @@ Matrix.I = function(n) {
       els[i][j] = (i == j) ? 1 : 0;
     }
   }
-  return Matrix.create(els);
+  return Sylvester.Matrix.create(els);
 };
 
 // Diagonal matrix - all off-diagonal elements are zero
-Matrix.Diagonal = function(elements) {
+Sylvester.Matrix.Diagonal = function(elements) {
   var i = elements.length;
-  var M = Matrix.I(i);
+  var M = Sylvester.Matrix.I(i);
   while (i--) {
     M.elements[i][i] = elements[i];
   }
@@ -414,9 +413,9 @@ Matrix.Diagonal = function(elements) {
 
 // Rotation matrix about some axis. If no axis is
 // supplied, assume we're after a 2D transform
-Matrix.Rotation = function(theta, a) {
+Sylvester.Matrix.Rotation = function(theta, a) {
   if (!a) {
-    return Matrix.create([
+    return Sylvester.Matrix.create([
       [Math.cos(theta),  -Math.sin(theta)],
       [Math.sin(theta),   Math.cos(theta)]
     ]);
@@ -429,7 +428,7 @@ Matrix.Rotation = function(theta, a) {
   // Formula derived here: http://www.gamedev.net/reference/articles/article1199.asp
   // That proof rotates the co-ordinate system so theta
   // becomes -theta and sin becomes -sin here.
-  return Matrix.create([
+  return Sylvester.Matrix.create([
     [ t*x*x + c, t*x*y - s*z, t*x*z + s*y ],
     [ t*x*y + s*z, t*y*y + c, t*y*z - s*x ],
     [ t*x*z - s*y, t*y*z + s*x, t*z*z + c ]
@@ -437,25 +436,25 @@ Matrix.Rotation = function(theta, a) {
 };
 
 // Special case rotations
-Matrix.RotationX = function(t) {
+Sylvester.Matrix.RotationX = function(t) {
   var c = Math.cos(t), s = Math.sin(t);
-  return Matrix.create([
+  return Sylvester.Matrix.create([
     [  1,  0,  0 ],
     [  0,  c, -s ],
     [  0,  s,  c ]
   ]);
 };
-Matrix.RotationY = function(t) {
+Sylvester.Matrix.RotationY = function(t) {
   var c = Math.cos(t), s = Math.sin(t);
-  return Matrix.create([
+  return Sylvester.Matrix.create([
     [  c,  0,  s ],
     [  0,  1,  0 ],
     [ -s,  0,  c ]
   ]);
 };
-Matrix.RotationZ = function(t) {
+Sylvester.Matrix.RotationZ = function(t) {
   var c = Math.cos(t), s = Math.sin(t);
-  return Matrix.create([
+  return Sylvester.Matrix.create([
     [  c, -s,  0 ],
     [  s,  c,  0 ],
     [  0,  0,  1 ]
@@ -463,14 +462,14 @@ Matrix.RotationZ = function(t) {
 };
 
 // Random matrix of n rows, m columns
-Matrix.Random = function(n, m) {
-  return Matrix.Zero(n, m).map(
+Sylvester.Matrix.Random = function(n, m) {
+  return Sylvester.Matrix.Zero(n, m).map(
     function() { return Math.random(); }
   );
 };
 
-// Matrix filled with zeros
-Matrix.Zero = function(n, m) {
+// Sylvester.Matrix filled with zeros
+Sylvester.Matrix.Zero = function(n, m) {
   var els = [], i = n, j;
   while (i--) { j = m;
     els[i] = [];
@@ -478,5 +477,5 @@ Matrix.Zero = function(n, m) {
       els[i][j] = 0;
     }
   }
-  return Matrix.create(els);
+  return Sylvester.Matrix.create(els);
 };
